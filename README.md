@@ -30,6 +30,7 @@ This project provides an **interactive, enriched viewer** for [Mermaid](https://
 * 📂 Collapse/expand header bar with state toggle
 * 🖼️ Copy rendered SVG to clipboard as PNG (via canvas)
 * ⚙️ Designed to support future plugins and customization
+* 📝 Fully compatible with Markdown-style Mermaid code blocks
 
 ---
 
