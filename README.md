@@ -1,7 +1,3 @@
-Here's a concise and clear **`README.md`** draft for your GitHub project, describing the purpose and features of the Mermaid viewer you've created:
-
----
-
 # 🧠 Mermaid Viewer
 
 This project provides an **interactive, enriched viewer** for [Mermaid](https://mermaid-js.github.io/) diagrams rendered in the browser. It supports:
@@ -19,23 +15,10 @@ This project provides an **interactive, enriched viewer** for [Mermaid](https://
 
 ---
 
-## 🚀 Usage
+## 🚀 Try It Now
 
-1. Load the HTML file in any modern browser.
-2. Add your Mermaid diagram inside a `<div class="mermaid-source">...</div>`.
-3. The script auto-converts and wraps it in an interactive viewer.
-
-Example diagram block:
-
-```html
-<div class="mermaid-source">
-  graph TD
-    A[Start] --> B{Is it working?}
-    B -- Yes --> C[Great!]
-    B -- No --> D[Fix it]
-    D --> B
-</div>
-```
+👉 **[Open the Mermaid Viewer](https://github.com/bonomani/Mermaid-Viewer/blob/main/mermaid_viewer.html)**
+*(To use locally: right-click → Save As)*
 
 ---
 
@@ -51,18 +34,29 @@ Example diagram block:
 
 ---
 
+## 🛠️ How to Use
+
+1. Load the HTML file in any modern browser.
+2. Add your Mermaid diagram inside a `<div class="mermaid-source">...</div>`.
+3. The script auto-converts and wraps it in an interactive viewer.
+
+Example:
+
+```html
+<div class="mermaid-source">
+  graph TD
+    A[Start] --> B{Is it working?}
+    B -- Yes --> C[Great!]
+    B -- No --> D[Fix it]
+    D --> B
+</div>
+```
+
+---
+
 ## 📦 No Dependencies
 
 * Uses [Mermaid](https://cdn.jsdelivr.net/npm/mermaid@10) from CDN
 * Works offline after first load (if cached)
-* Single self-contained HTML file
+* Single, self-contained HTML file
 
----
-
-## 📜 License
-
-MIT License — use freely and adapt for your needs.
-
----
-
-Would you like to add a screenshot or GIF to show the interactivity in action?
