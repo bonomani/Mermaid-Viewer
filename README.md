@@ -17,7 +17,7 @@ This project provides an **interactive, enriched viewer** for [Mermaid](https://
 
 ## 🚀 Try It Now
 
-👉 **[Open the Mermaid Viewer](https://github.com/bonomani/Mermaid-Viewer/blob/main/mermaid_viewer.html)**
+👉 **[Open the Mermaid Viewer](https://bonomani.github.io/Mermaid-Viewer/mermaid_viewer.html)**
 *(To use locally: right-click → Save As)*
 
 ---
