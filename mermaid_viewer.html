@@ -382,7 +382,8 @@
       } else {
         const maxHeight = Math.max(120, window.innerHeight - 8);
         const maxWidth = Math.max(120, window.innerWidth - 8);
-        const viewerWidth = Math.min(scaledWidth, maxWidth);
+        const headerWidth = header.scrollWidth + extraWidth;
+        const viewerWidth = Math.min(Math.max(scaledWidth + extraWidth, headerWidth), maxWidth);
         const viewerHeight = Math.min(scaledHeight + header.offsetHeight, maxHeight);
         const wrapperHeight = Math.max(0, viewerHeight - header.offsetHeight);
 
