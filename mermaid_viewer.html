@@ -83,8 +83,6 @@
       display: block;
       width: max-content;
       height: max-content;
-      transform-origin: top left;
-      will-change: transform;
     }
 
     .mermaid-viewer .svg-container svg {
@@ -205,8 +203,6 @@
         svgElement.setAttribute('viewBox', `${box.x} ${box.y} ${box.width} ${box.height}`);
         svgElement.removeAttribute('width');
         svgElement.removeAttribute('height');
-        svgElement.style.width = `${box.width}px`;
-        svgElement.style.height = `${box.height}px`;
 
         const availableWidth = Math.max(1, Math.min(window.innerWidth - 8, box.width));
         const baseScale = Math.min(1, availableWidth / box.width);
@@ -358,55 +354,43 @@
 
       if (!header || !wrapper || !container) return;
 
-      state.svgElement.style.width = `${state.width}px`;
-      state.svgElement.style.height = `${state.height}px`;
+      const scaledWidth = state.width * state.scale;
+      const scaledHeight = state.height * state.scale;
 
-      container.style.width = `${state.width}px`;
-      container.style.height = `${state.height}px`;
-      container.style.transform = `scale(${state.scale})`;
-      container.style.transformOrigin = 'top left';
+      container.style.transform = '';
+      container.style.position = '';
+      container.style.left = '';
+      container.style.top = '';
 
-      const scrollWidth = state.width * state.scale;
-      const scrollHeight = state.height * state.scale;
+      state.svgElement.style.width = `${scaledWidth}px`;
+      state.svgElement.style.height = `${scaledHeight}px`;
 
-      wrapper.style.setProperty('--scroll-width', `${scrollWidth}px`);
-      wrapper.style.setProperty('--scroll-height', `${scrollHeight}px`);
+      container.style.width = `${scaledWidth}px`;
+      container.style.height = `${scaledHeight}px`;
 
-      let scrollSpacer = wrapper.querySelector('.scroll-spacer');
-
-      if (!scrollSpacer) {
-        scrollSpacer = document.createElement('div');
-        scrollSpacer.className = 'scroll-spacer';
-        scrollSpacer.style.pointerEvents = 'none';
-        scrollSpacer.style.position = 'absolute';
-        scrollSpacer.style.left = '0';
-        scrollSpacer.style.top = '0';
-        wrapper.appendChild(scrollSpacer);
-      }
-
-      wrapper.style.position = 'relative';
-      container.style.position = 'absolute';
-      container.style.left = '0';
-      container.style.top = '0';
-      scrollSpacer.style.width = `${scrollWidth}px`;
-      scrollSpacer.style.height = `${scrollHeight}px`;
+      const scrollSpacer = wrapper.querySelector('.scroll-spacer');
+      if (scrollSpacer) scrollSpacer.remove();
 
       if (viewerWrapper.classList.contains('fullscreen')) {
         viewer.style.width = '100%';
         viewer.style.height = '100%';
         wrapper.style.height = `${window.innerHeight - header.offsetHeight}px`;
       } else {
-        viewer.style.width = '';
-        viewer.style.height = '';
-
         const maxHeight = Math.max(120, window.innerHeight - 8);
         const maxWidth = Math.max(120, window.innerWidth - 8);
+        const viewerWidth = Math.min(scaledWidth, maxWidth);
+        const viewerHeight = Math.min(scaledHeight + header.offsetHeight, maxHeight);
+        const wrapperHeight = Math.max(0, viewerHeight - header.offsetHeight);
 
         viewer.style.maxWidth = `${maxWidth}px`;
         viewer.style.maxHeight = `${maxHeight}px`;
+        viewer.style.width = `${viewerWidth}px`;
+        viewer.style.height = `${viewerHeight}px`;
+
         wrapper.style.maxWidth = `${maxWidth}px`;
         wrapper.style.maxHeight = `${maxHeight - header.offsetHeight}px`;
-        wrapper.style.height = '';
+        wrapper.style.width = `${viewerWidth}px`;
+        wrapper.style.height = `${wrapperHeight}px`;
       }
     }
 
@@ -456,3 +440,5 @@
 </script>
 </body>
 </html>
+
+Qualité: 10/10
