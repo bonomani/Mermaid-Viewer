@@ -19,24 +19,34 @@
       vertical-align: top;
     }
 
-    .mermaid-viewer .viewer-area {
+    .mermaid-viewer {
       display: inline-block;
+      vertical-align: top;
+    }
+
+    .mermaid-viewer .viewer-area {
+      display: flex;
+      flex-direction: column;
       background: #fdfdfd;
       border: 1px solid #ccc;
       border-radius: 4px;
       margin: 0.5em;
-      vertical-align: top;
       overflow: hidden;
+      max-width: calc(100vw - 1em);
+      max-height: calc(100vh - 1em);
     }
 
     .mermaid-viewer .header-bar {
+      flex: 0 0 auto;
       display: flex;
       justify-content: space-between;
       align-items: center;
+      gap: 1em;
       padding: 0.5em 1em;
       background: #f9f9f9;
       border-bottom: 1px solid #ccc;
       width: 100%;
+      overflow-x: auto;
     }
 
     .mermaid-viewer .header-left {
@@ -44,18 +54,23 @@
       align-items: center;
       gap: 0.5em;
       font-weight: bold;
+      white-space: nowrap;
     }
 
-    .mermaid-viewer .buttons button {
-      margin-left: 0.5em;
+    .mermaid-viewer .buttons {
+      display: flex;
+      gap: 0.5em;
+      white-space: nowrap;
     }
 
     .mermaid-viewer .svg-wrapper {
+      flex: 1 1 auto;
       overflow: auto;
       background: #fff;
       cursor: grab;
-      max-height: 100%;
       max-width: 100%;
+      max-height: 100%;
+      min-height: 0;
       text-align: start;
       touch-action: none;
     }
@@ -66,18 +81,12 @@
 
     .mermaid-viewer .svg-container {
       display: block;
+      width: max-content;
+      height: max-content;
     }
 
-    .mermaid-viewer .svg-scaler {
-      display: inline-block;
-      transform-origin: top left;
-      transition: transform 0.2s;
-    }
-
-    .mermaid-viewer .svg-scaler svg {
+    .mermaid-viewer .svg-container svg {
       display: block;
-      width: auto;
-      height: auto;
     }
 
     .mermaid-viewer.fullscreen {
@@ -89,21 +98,15 @@
       padding: 0;
       z-index: 9999;
       background: #fff;
-      border-radius: 0;
     }
 
     .mermaid-viewer.fullscreen .viewer-area {
       width: 100%;
       height: 100%;
+      max-width: none;
+      max-height: none;
       margin: 0;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .mermaid-viewer.fullscreen .svg-wrapper {
-      flex-grow: 1;
-      max-width: none !important;
-      max-height: none !important;
+      border-radius: 0;
     }
   </style>
 </head>
@@ -143,16 +146,14 @@
 
   mermaid.initialize({ startOnLoad: false });
 
-  const DEBUG = true;
   const sources = document.querySelectorAll('.mermaid-source');
   const states = new Map();
 
   sources.forEach((source, index) => {
     const graphId = `mermaid-svg-${index}`;
-    const wrapperId = `wrapper-${index}`;
 
     const viewerWrapper = document.createElement('div');
-    viewerWrapper.classList.add('mermaid-viewer');
+    viewerWrapper.className = 'mermaid-viewer';
 
     const viewer = document.createElement('div');
     viewer.className = 'viewer-area';
@@ -164,17 +165,15 @@
           # ${index + 1}
         </div>
         <div class="buttons">
-          <button class="toggle-fullscreen-btn" title="Toggle Fullscreen">⛶</button>
+          <button class="toggle-fullscreen-btn">⛶</button>
           <button data-action="in">🔍➕</button>
           <button data-action="out">🔍➖</button>
           <button data-action="reset">♻️</button>
-          <button class="copy-png-btn" title="Copy as PNG">🖼️</button>
+          <button class="copy-png-btn">🖼️</button>
         </div>
       </div>
-      <div class="svg-wrapper" id="${wrapperId}">
-        <div class="svg-container">
-          <div class="svg-scaler"></div>
-        </div>
+      <div class="svg-wrapper">
+        <div class="svg-container"></div>
       </div>
     `;
 
@@ -185,91 +184,85 @@
     parent.replaceChild(viewerWrapper, source);
 
     const svgWrapper = viewer.querySelector('.svg-wrapper');
-    const svgScaler = viewer.querySelector('.svg-scaler');
+    const svgContainer = viewer.querySelector('.svg-container');
     const buttons = viewer.querySelectorAll('[data-action]');
     const toggleBtn = viewer.querySelector('.toggle-btn');
     const fullscreenBtn = viewer.querySelector('.toggle-fullscreen-btn');
     const copyPngBtn = viewer.querySelector('.copy-png-btn');
 
     mermaid.render(graphId, sourceText).then(({ svg }) => {
-      svgScaler.innerHTML = svg;
+      svgContainer.innerHTML = svg;
 
-      const svgElement = svgScaler.querySelector('svg');
-
+      const svgElement = svgContainer.querySelector('svg');
       if (!svgElement) return;
 
-      svgElement.removeAttribute('height');
-      svgElement.removeAttribute('width');
-
       requestAnimationFrame(() => {
-        const box = getNaturalSvgBox(svgElement);
-
+        const box = getSvgBox(svgElement);
         if (!box || box.width < 1 || box.height < 1) return;
 
-        const viewBox = svgElement.getAttribute('viewBox');
+        svgElement.setAttribute('viewBox', `${box.x} ${box.y} ${box.width} ${box.height}`);
+        svgElement.removeAttribute('width');
+        svgElement.removeAttribute('height');
 
-        if (!viewBox) {
-          svgElement.setAttribute('viewBox', `${box.x} ${box.y} ${box.width} ${box.height}`);
-        }
-
-        svgElement.setAttribute('width', box.width);
-        svgElement.setAttribute('height', box.height);
-        svgElement.style.width = `${box.width}px`;
-        svgElement.style.height = `${box.height}px`;
-
-        const wrapperWidth = Math.max(svgWrapper.clientWidth, 1);
-        const baseScale = wrapperWidth > 10 ? Math.min(1, wrapperWidth / box.width) : 1;
+        const availableWidth = Math.max(1, Math.min(window.innerWidth - 32, box.width));
+        const baseScale = Math.min(1, availableWidth / box.width);
 
         states.set(viewer, {
+          svgElement,
           scale: baseScale,
           baseScale,
-          width: box.width,
-          height: box.height,
           x: box.x,
-          y: box.y
+          y: box.y,
+          width: box.width,
+          height: box.height
         });
 
-        applyScale(viewer);
+        applyLayout(viewer);
       });
     });
 
     fullscreenBtn.addEventListener('click', () => {
       viewerWrapper.classList.toggle('fullscreen');
-      requestAnimationFrame(() => applyScale(viewer));
+      requestAnimationFrame(() => applyLayout(viewer));
     });
 
     buttons.forEach(btn => {
       btn.addEventListener('click', () => {
         const state = states.get(viewer);
-
         if (!state) return;
 
-        if (btn.dataset.action === 'in') {
-          state.scale *= 1.2;
-        } else if (btn.dataset.action === 'out') {
-          state.scale /= 1.2;
-        } else if (btn.dataset.action === 'reset') {
-          state.scale = state.baseScale;
-        }
+        if (btn.dataset.action === 'in') state.scale *= 1.2;
+        if (btn.dataset.action === 'out') state.scale /= 1.2;
+        if (btn.dataset.action === 'reset') state.scale = state.baseScale;
 
-        applyScale(viewer);
+        applyLayout(viewer);
       });
     });
 
+    toggleBtn.addEventListener('click', () => {
+      const isOpen = toggleBtn.getAttribute('data-open') === 'true';
+
+      toggleBtn.setAttribute('data-open', String(!isOpen));
+      toggleBtn.textContent = isOpen ? '▶' : '▼';
+      svgWrapper.style.display = isOpen ? 'none' : '';
+
+      if (!isOpen) {
+        requestAnimationFrame(() => applyLayout(viewer));
+      }
+    });
+
     copyPngBtn.addEventListener('click', () => {
-      const svgElement = viewer.querySelector('svg');
       const state = states.get(viewer);
+      if (!state) return;
 
-      if (!svgElement || !state) return;
+      const clone = state.svgElement.cloneNode(true);
+      clone.setAttribute('width', state.width);
+      clone.setAttribute('height', state.height);
+      clone.setAttribute('viewBox', `${state.x} ${state.y} ${state.width} ${state.height}`);
 
-      const svgClone = svgElement.cloneNode(true);
-      svgClone.setAttribute('width', state.width);
-      svgClone.setAttribute('height', state.height);
-      svgClone.setAttribute('viewBox', `${state.x} ${state.y} ${state.width} ${state.height}`);
-
-      const svgData = new XMLSerializer().serializeToString(svgClone);
-      const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
-      const url = URL.createObjectURL(svgBlob);
+      const svgData = new XMLSerializer().serializeToString(clone);
+      const blob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
       const img = new Image();
 
       img.onload = () => {
@@ -278,7 +271,6 @@
         canvas.height = Math.ceil(state.height * state.scale);
 
         const ctx = canvas.getContext('2d');
-
         if (!ctx) {
           URL.revokeObjectURL(url);
           return;
@@ -288,37 +280,27 @@
         ctx.drawImage(img, 0, 0);
         URL.revokeObjectURL(url);
 
-        canvas.toBlob(blob => {
-          if (!blob) return;
+        canvas.toBlob(pngBlob => {
+          if (!pngBlob) return;
 
           if (navigator.clipboard && window.ClipboardItem) {
-            navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]).then(() => {
+            navigator.clipboard.write([
+              new ClipboardItem({ 'image/png': pngBlob })
+            ]).then(() => {
               const original = copyPngBtn.textContent;
               copyPngBtn.textContent = '✔';
               setTimeout(() => copyPngBtn.textContent = original, 1000);
             }).catch(() => {
-              downloadBlob(blob, `diagram-${index + 1}.png`);
+              downloadBlob(pngBlob, `diagram-${index + 1}.png`);
             });
           } else {
-            downloadBlob(blob, `diagram-${index + 1}.png`);
+            downloadBlob(pngBlob, `diagram-${index + 1}.png`);
           }
         }, 'image/png');
       };
 
       img.onerror = () => URL.revokeObjectURL(url);
       img.src = url;
-    });
-
-    toggleBtn.addEventListener('click', () => {
-      const isOpen = toggleBtn.getAttribute('data-open') === 'true';
-
-      toggleBtn.setAttribute('data-open', (!isOpen).toString());
-      toggleBtn.textContent = isOpen ? '▶' : '▼';
-      svgWrapper.style.display = isOpen ? 'none' : 'block';
-
-      if (!isOpen) {
-        requestAnimationFrame(() => applyScale(viewer));
-      }
     });
 
     let isDragging = false;
@@ -338,6 +320,14 @@
       scrollTop = svgWrapper.scrollTop;
     });
 
+    svgWrapper.addEventListener('pointermove', e => {
+      if (!isDragging) return;
+
+      e.preventDefault();
+      svgWrapper.scrollLeft = scrollLeft - (e.clientX - startX);
+      svgWrapper.scrollTop = scrollTop - (e.clientY - startY);
+    });
+
     svgWrapper.addEventListener('pointerup', e => {
       isDragging = false;
       svgWrapper.classList.remove('dragging');
@@ -352,73 +342,47 @@
       svgWrapper.classList.remove('dragging');
     });
 
-    svgWrapper.addEventListener('pointermove', e => {
-      if (!isDragging) return;
+    window.addEventListener('resize', () => applyLayout(viewer));
 
-      e.preventDefault();
-
-      svgWrapper.scrollLeft = scrollLeft - (e.clientX - startX);
-      svgWrapper.scrollTop = scrollTop - (e.clientY - startY);
-    });
-
-    window.addEventListener('resize', () => applyScale(viewer));
-
-    function applyScale(viewer) {
-      const svgElement = viewer.querySelector('svg');
-      const scaler = viewer.querySelector('.svg-scaler');
-      const container = viewer.querySelector('.svg-container');
-      const wrapper = viewer.querySelector('.svg-wrapper');
-      const header = viewer.querySelector('.header-bar');
+    function applyLayout(viewer) {
       const state = states.get(viewer);
+      if (!state) return;
 
-      if (!svgElement || !scaler || !container || !wrapper || !header || !state) return;
+      const header = viewer.querySelector('.header-bar');
+      const wrapper = viewer.querySelector('.svg-wrapper');
+      const container = viewer.querySelector('.svg-container');
 
-      scaler.style.transform = `scale(${state.scale})`;
-      scaler.style.width = `${state.width}px`;
-      scaler.style.height = `${state.height}px`;
+      if (!header || !wrapper || !container) return;
 
-      container.style.width = `${state.width * state.scale}px`;
-      container.style.height = `${state.height * state.scale}px`;
+      const scaledWidth = state.width * state.scale;
+      const scaledHeight = state.height * state.scale;
+
+      state.svgElement.style.width = `${scaledWidth}px`;
+      state.svgElement.style.height = `${scaledHeight}px`;
+
+      container.style.width = `${scaledWidth}px`;
+      container.style.height = `${scaledHeight}px`;
 
       if (viewerWrapper.classList.contains('fullscreen')) {
         viewer.style.width = '100%';
         viewer.style.height = '100%';
-        viewer.style.maxWidth = 'none';
-        viewer.style.maxHeight = 'none';
-        wrapper.style.maxWidth = 'none';
-        wrapper.style.maxHeight = 'none';
+        wrapper.style.height = `${window.innerHeight - header.offsetHeight}px`;
       } else {
         viewer.style.width = '';
         viewer.style.height = '';
 
-        const viewerStyles = getComputedStyle(viewer);
-        const marginTop = parseFloat(viewerStyles.marginTop) || 0;
-        const marginBottom = parseFloat(viewerStyles.marginBottom) || 0;
-        const marginLeft = parseFloat(viewerStyles.marginLeft) || 0;
-        const marginRight = parseFloat(viewerStyles.marginRight) || 0;
+        const maxHeight = Math.max(120, window.innerHeight - 32);
+        const maxWidth = Math.max(120, window.innerWidth - 32);
 
-        const windowHeight = window.innerHeight - marginTop - marginBottom;
-        const windowWidth = window.innerWidth - marginLeft - marginRight;
-
-        viewer.style.maxHeight = `${windowHeight}px`;
-        viewer.style.maxWidth = `${windowWidth}px`;
-
-        wrapper.style.maxHeight = `${Math.max(100, windowHeight - header.offsetHeight)}px`;
-        wrapper.style.maxWidth = `${windowWidth}px`;
-      }
-
-      if (DEBUG) {
-        console.groupCollapsed(`[ZOOM] Diagram ${graphId} @ scale ${state.scale.toFixed(2)}`);
-        console.log(`natural:       ${state.width.toFixed(2)} x ${state.height.toFixed(2)}`);
-        console.log(`container:     ${container.offsetWidth}px x ${container.offsetHeight}px`);
-        console.log(`scaler:        ${scaler.offsetWidth}px x ${scaler.offsetHeight}px`);
-        console.log(`svg-wrapper:   ${wrapper.offsetWidth}px x ${wrapper.offsetHeight}px`);
-        console.log(`svg visible:   ${svgElement.getBoundingClientRect().width.toFixed(2)} x ${svgElement.getBoundingClientRect().height.toFixed(2)}`);
-        console.groupEnd();
+        viewer.style.maxWidth = `${maxWidth}px`;
+        viewer.style.maxHeight = `${maxHeight}px`;
+        wrapper.style.maxWidth = `${maxWidth}px`;
+        wrapper.style.maxHeight = `${maxHeight - header.offsetHeight}px`;
+        wrapper.style.height = '';
       }
     }
 
-    function getNaturalSvgBox(svgElement) {
+    function getSvgBox(svgElement) {
       const viewBox = svgElement.viewBox.baseVal;
 
       if (viewBox && viewBox.width > 0 && viewBox.height > 0) {
@@ -430,11 +394,11 @@
         };
       }
 
-      const gElement = svgElement.querySelector('g');
+      const g = svgElement.querySelector('g');
 
       try {
-        if (gElement) {
-          const box = gElement.getBBox();
+        if (g) {
+          const box = g.getBBox();
 
           return {
             x: box.x,
@@ -443,18 +407,11 @@
             height: box.height
           };
         }
-
-        const rect = svgElement.getBoundingClientRect();
-
-        return {
-          x: 0,
-          y: 0,
-          width: rect.width,
-          height: rect.height
-        };
       } catch {
         return null;
       }
+
+      return null;
     }
 
     function downloadBlob(blob, filename) {
