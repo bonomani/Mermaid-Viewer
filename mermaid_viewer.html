@@ -198,6 +198,7 @@
     const buttons = viewer.querySelectorAll('[data-action]');
     const toggleBtn = viewer.querySelector('.toggle-btn');
     const fullscreenBtn = viewer.querySelector('.toggle-fullscreen-btn');
+    const copyPngBtn = viewer.querySelector('.copy-png-btn');
     const minHeaderWidth = Math.ceil(viewer.querySelector('.header-bar').scrollWidth) + 2;
     mermaid.render(graphId, sourceText).then(({ svg }) => {
       svgContainer.innerHTML = svg;
