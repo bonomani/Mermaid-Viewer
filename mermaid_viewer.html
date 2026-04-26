@@ -65,6 +65,9 @@
 
     .mermaid-viewer .svg-wrapper {
       flex: 1 1 auto;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
       overflow: auto;
       background: #fff;
       cursor: grab;
@@ -364,16 +367,19 @@
       container.style.position = '';
       container.style.left = '';
       container.style.top = '';
-
-      state.svgElement.style.width = `${scaledWidth}px`;
-      state.svgElement.style.height = `${scaledHeight}px`;
-            
+      
       state.svgElement.style.maxWidth = 'none';
       state.svgElement.style.width = `${scaledWidth}px`;
       state.svgElement.style.height = `${scaledHeight}px`;
-
+      
+      container.style.width = `${scaledWidth}px`;
+      container.style.height = `${scaledHeight}px`;
+      
       const scrollSpacer = wrapper.querySelector('.scroll-spacer');
       if (scrollSpacer) scrollSpacer.remove();
+      
+      const extraWidth = 2;
+      const extraHeight = header.offsetHeight + 2;
 
       if (viewerWrapper.classList.contains('fullscreen')) {
         viewer.style.width = '100%';
@@ -384,8 +390,9 @@
         const maxWidth = Math.max(120, window.innerWidth - 8);
         const headerWidth = header.scrollWidth + extraWidth;
         const viewerWidth = Math.min(Math.max(scaledWidth + extraWidth, headerWidth), maxWidth);
-        const viewerHeight = Math.min(scaledHeight + header.offsetHeight, maxHeight);
-        const wrapperHeight = Math.max(0, viewerHeight - header.offsetHeight);
+        const viewerHeight = Math.min(scaledHeight + extraHeight, maxHeight);
+        const wrapperWidth = Math.max(0, viewerWidth - extraWidth);
+        const wrapperHeight = Math.max(0, viewerHeight - extraHeight);
 
         viewer.style.maxWidth = `${maxWidth}px`;
         viewer.style.maxHeight = `${maxHeight}px`;
@@ -394,7 +401,7 @@
 
         wrapper.style.maxWidth = `${maxWidth}px`;
         wrapper.style.maxHeight = `${maxHeight - header.offsetHeight}px`;
-        wrapper.style.width = `${viewerWidth}px`;
+        wrapper.style.width = `${wrapperWidth}px`;
         wrapper.style.height = `${wrapperHeight}px`;
       }
     }
