@@ -32,8 +32,8 @@
       border-radius: 4px;
       margin: 0.5em;
       overflow: hidden;
-      max-width: calc(100vw - 1em);
-      max-height: calc(100vh - 1em);
+      max-width: calc(100vw - 8px);
+      max-height: calc(100vh - 8px);
     }
 
     .mermaid-viewer .header-bar {
@@ -204,7 +204,7 @@
         svgElement.removeAttribute('width');
         svgElement.removeAttribute('height');
 
-        const availableWidth = Math.max(1, Math.min(window.innerWidth - 32, box.width));
+        const availableWidth = Math.max(1, Math.min(window.innerWidth - 8, box.width));
         const baseScale = Math.min(1, availableWidth / box.width);
 
         states.set(viewer, {
@@ -371,8 +371,8 @@
         viewer.style.width = '';
         viewer.style.height = '';
 
-        const maxHeight = Math.max(120, window.innerHeight - 32);
-        const maxWidth = Math.max(120, window.innerWidth - 32);
+        const maxHeight = Math.max(120, window.innerHeight - 8);
+        const maxWidth = Math.max(120, window.innerWidth - 8);
 
         viewer.style.maxWidth = `${maxWidth}px`;
         viewer.style.maxHeight = `${maxHeight}px`;
