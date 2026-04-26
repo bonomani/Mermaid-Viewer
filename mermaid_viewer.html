@@ -59,6 +59,7 @@
 
     .mermaid-viewer .buttons {
       display: flex;
+      min-width: 2.4em;
       gap: 0.5em;
       white-space: nowrap;
     }
@@ -388,7 +389,7 @@
       } else {
         const maxHeight = Math.max(120, window.innerHeight - 8);
         const maxWidth = Math.max(120, window.innerWidth - 8);
-        const headerWidth = header.scrollWidth + extraWidth;
+        const headerWidth = Math.ceil(header.getBoundingClientRect().width) + extraWidth;
         const viewerWidth = Math.min(Math.max(scaledWidth + extraWidth, headerWidth), maxWidth);
         const viewerHeight = Math.min(scaledHeight + extraHeight, maxHeight);
         const wrapperWidth = Math.max(0, viewerWidth - extraWidth);
