@@ -87,6 +87,9 @@
 
     .mermaid-viewer .svg-container svg {
       display: block;
+      max-width: none !important;
+      width: auto;
+      height: auto;
     }
 
     .mermaid-viewer.fullscreen {
@@ -364,9 +367,10 @@
 
       state.svgElement.style.width = `${scaledWidth}px`;
       state.svgElement.style.height = `${scaledHeight}px`;
-
-      container.style.width = `${scaledWidth}px`;
-      container.style.height = `${scaledHeight}px`;
+            
+      state.svgElement.style.maxWidth = 'none';
+      state.svgElement.style.width = `${scaledWidth}px`;
+      state.svgElement.style.height = `${scaledHeight}px`;
 
       const scrollSpacer = wrapper.querySelector('.scroll-spacer');
       if (scrollSpacer) scrollSpacer.remove();
