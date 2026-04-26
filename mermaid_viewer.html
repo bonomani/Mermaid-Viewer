@@ -56,12 +56,15 @@
       font-weight: bold;
       white-space: nowrap;
     }
-
+  
     .mermaid-viewer .buttons {
       display: flex;
-      min-width: 2.4em;
       gap: 0.5em;
       white-space: nowrap;
+    }
+    
+    .mermaid-viewer button {
+      min-width: 2.4em;
     }
 
     .mermaid-viewer .svg-wrapper {
@@ -195,8 +198,7 @@
     const buttons = viewer.querySelectorAll('[data-action]');
     const toggleBtn = viewer.querySelector('.toggle-btn');
     const fullscreenBtn = viewer.querySelector('.toggle-fullscreen-btn');
-    const copyPngBtn = viewer.querySelector('.copy-png-btn');
-
+    const minHeaderWidth = Math.ceil(viewer.querySelector('.header-bar').scrollWidth) + 2;
     mermaid.render(graphId, sourceText).then(({ svg }) => {
       svgContainer.innerHTML = svg;
 
@@ -389,7 +391,7 @@
       } else {
         const maxHeight = Math.max(120, window.innerHeight - 8);
         const maxWidth = Math.max(120, window.innerWidth - 8);
-        const headerWidth = Math.ceil(header.getBoundingClientRect().width) + extraWidth;
+        const headerWidth = minHeaderWidth;
         const viewerWidth = Math.min(Math.max(scaledWidth + extraWidth, headerWidth), maxWidth);
         const viewerHeight = Math.min(scaledHeight + extraHeight, maxHeight);
         const wrapperWidth = Math.max(0, viewerWidth - extraWidth);
