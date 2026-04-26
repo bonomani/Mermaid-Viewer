@@ -83,6 +83,8 @@
       display: block;
       width: max-content;
       height: max-content;
+      transform-origin: top left;
+      will-change: transform;
     }
 
     .mermaid-viewer .svg-container svg {
@@ -203,6 +205,8 @@
         svgElement.setAttribute('viewBox', `${box.x} ${box.y} ${box.width} ${box.height}`);
         svgElement.removeAttribute('width');
         svgElement.removeAttribute('height');
+        svgElement.style.width = `${box.width}px`;
+        svgElement.style.height = `${box.height}px`;
 
         const availableWidth = Math.max(1, Math.min(window.innerWidth - 8, box.width));
         const baseScale = Math.min(1, availableWidth / box.width);
@@ -354,14 +358,38 @@
 
       if (!header || !wrapper || !container) return;
 
-      const scaledWidth = state.width * state.scale;
-      const scaledHeight = state.height * state.scale;
+      state.svgElement.style.width = `${state.width}px`;
+      state.svgElement.style.height = `${state.height}px`;
 
-      state.svgElement.style.width = `${scaledWidth}px`;
-      state.svgElement.style.height = `${scaledHeight}px`;
+      container.style.width = `${state.width}px`;
+      container.style.height = `${state.height}px`;
+      container.style.transform = `scale(${state.scale})`;
+      container.style.transformOrigin = 'top left';
 
-      container.style.width = `${scaledWidth}px`;
-      container.style.height = `${scaledHeight}px`;
+      const scrollWidth = state.width * state.scale;
+      const scrollHeight = state.height * state.scale;
+
+      wrapper.style.setProperty('--scroll-width', `${scrollWidth}px`);
+      wrapper.style.setProperty('--scroll-height', `${scrollHeight}px`);
+
+      let scrollSpacer = wrapper.querySelector('.scroll-spacer');
+
+      if (!scrollSpacer) {
+        scrollSpacer = document.createElement('div');
+        scrollSpacer.className = 'scroll-spacer';
+        scrollSpacer.style.pointerEvents = 'none';
+        scrollSpacer.style.position = 'absolute';
+        scrollSpacer.style.left = '0';
+        scrollSpacer.style.top = '0';
+        wrapper.appendChild(scrollSpacer);
+      }
+
+      wrapper.style.position = 'relative';
+      container.style.position = 'absolute';
+      container.style.left = '0';
+      container.style.top = '0';
+      scrollSpacer.style.width = `${scrollWidth}px`;
+      scrollSpacer.style.height = `${scrollHeight}px`;
 
       if (viewerWrapper.classList.contains('fullscreen')) {
         viewer.style.width = '100%';
