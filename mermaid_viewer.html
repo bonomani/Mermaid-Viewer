@@ -66,6 +66,10 @@
     .mermaid-viewer button {
       min-width: 2.4em;
     }
+    
+    .mermaid-viewer.fullscreen .toggle-btn {
+      display: none;
+    }
 
     .mermaid-viewer .svg-wrapper {
       flex: 1 1 auto;
@@ -259,11 +263,11 @@
     });
     
     toggleBtn.addEventListener('click', () => {
-      const isOpen = viewerWrapper.classList.toggle('collapsed');
+      const isCollapsed = viewerWrapper.classList.toggle('collapsed');
     
-      toggleBtn.textContent = isOpen ? '▶' : '▼';
+      toggleBtn.textContent = isCollapsed ? '▶' : '▼';
     
-      if (!isOpen) {
+      if (!isCollapsed) {
         requestAnimationFrame(() => applyLayout(viewer));
       }
     });
@@ -463,5 +467,3 @@
 </script>
 </body>
 </html>
-
-Qualité: 10/10
