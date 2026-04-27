@@ -250,6 +250,9 @@
     });
 
     fullscreenBtn.addEventListener('click', () => {
+      viewerWrapper.classList.remove('collapsed');
+      toggleBtn.textContent = '▼';
+    
       viewerWrapper.classList.toggle('fullscreen');
       requestAnimationFrame(() => applyLayout(viewer));
     });
