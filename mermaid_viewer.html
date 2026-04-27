@@ -404,7 +404,11 @@
       if (viewerWrapper.classList.contains('fullscreen')) {
         viewer.style.width = '100%';
         viewer.style.height = '100%';
+      
+        wrapper.style.width = '100%';
+        wrapper.style.maxWidth = 'none';
         wrapper.style.height = `${window.innerHeight - header.offsetHeight}px`;
+        wrapper.style.maxHeight = 'none';
       } else {
         const maxHeight = Math.max(120, window.innerHeight - 8);
         const maxWidth = Math.max(120, window.innerWidth - 8);
