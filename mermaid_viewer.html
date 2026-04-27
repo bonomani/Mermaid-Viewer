@@ -402,13 +402,27 @@
       const extraHeight = header.offsetHeight + 2;
 
       if (viewerWrapper.classList.contains('fullscreen')) {
+        const availableWidth = window.innerWidth;
+        const availableHeight = window.innerHeight - header.offsetHeight;
+        const fitScale = Math.min(availableWidth / state.width, availableHeight / state.height);
+      
+        const fitWidth = state.width * fitScale;
+        const fitHeight = state.height * fitScale;
+      
         viewer.style.width = '100%';
         viewer.style.height = '100%';
       
         wrapper.style.width = '100%';
         wrapper.style.maxWidth = 'none';
-        wrapper.style.height = `${window.innerHeight - header.offsetHeight}px`;
+        wrapper.style.height = `${availableHeight}px`;
         wrapper.style.maxHeight = 'none';
+        wrapper.style.overflow = 'hidden';
+      
+        state.svgElement.style.width = `${fitWidth}px`;
+        state.svgElement.style.height = `${fitHeight}px`;
+      
+        container.style.width = `${fitWidth}px`;
+        container.style.height = `${fitHeight}px`;
       } else {
         const maxHeight = Math.max(120, window.innerHeight - 8);
         const maxWidth = Math.max(120, window.innerWidth - 8);
