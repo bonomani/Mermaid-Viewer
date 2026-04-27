@@ -118,6 +118,15 @@
       margin: 0;
       border-radius: 0;
     }
+    
+    .mermaid-viewer.collapsed .svg-wrapper {
+      display: none;
+    }
+    
+    .mermaid-viewer.collapsed .viewer-area {
+      height: auto !important;
+    }
+    
   </style>
 </head>
 
@@ -248,14 +257,12 @@
         applyLayout(viewer);
       });
     });
-
+    
     toggleBtn.addEventListener('click', () => {
-      const isOpen = toggleBtn.getAttribute('data-open') === 'true';
-
-      toggleBtn.setAttribute('data-open', String(!isOpen));
+      const isOpen = viewerWrapper.classList.toggle('collapsed');
+    
       toggleBtn.textContent = isOpen ? '▶' : '▼';
-      svgWrapper.style.display = isOpen ? 'none' : '';
-
+    
       if (!isOpen) {
         requestAnimationFrame(() => applyLayout(viewer));
       }
